@@ -23,6 +23,8 @@
 # misc
 .DS_Store
 *.pem
+*Zone.Identifier
+*.modified
 
 # debug
 npm-debug.log*
@@ -43,3 +45,24 @@ next-env.d.ts
 # firebase
 firebase-debug.log
 firestore-debug.log
+
+# build artifacts
+*.tsbuildinfo
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+
+# temporary files
+*.tmp
+*.temp
+.cache/
