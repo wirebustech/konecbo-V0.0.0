@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { registerToWaitlist, type WaitlistState } from '@/app/actions';
+import { joinWaitlist, type WaitlistState } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,9 +38,9 @@ export function WaitlistForm() {
   const initialState: WaitlistState = {
     message: '',
     status: 'idle',
-    errors: {},
+    errors: null,
   };
-  const [state, formAction] = useActionState(registerToWaitlist, initialState);
+  const [state, formAction] = useActionState(joinWaitlist, initialState);
 
   useEffect(() => {
     if (state.status === 'success') {

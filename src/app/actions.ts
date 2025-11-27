@@ -1,19 +1,25 @@
 'use server';
 
 import { z } from 'zod';
-import { db } from '@/lib/firebase';
+import { db } from '@/lib/firebase-admin';
 import { sendWaitlistNotification } from '@/lib/email';
 
 const WaitlistFormSchema = z.object({
-  name: z.string(),
-  email: z.string().email(),
-  researchInterests: z.string(),
+  name: z.string().min(1, { message: 'Name is required' }),
+  email: z.string().email({ message: 'Invalid email address' }),
+  researchInterests: z.string().min(1, { message: 'Research interests are required' }),
 });
 
 export interface WaitlistState {
   message: string;
   status: 'success' | 'error' | 'idle';
+  errors?: {
+    name?: string[];
+    email?: string[];
+    researchInterests?: string[];
+  } | null;
 }
+
 
 /**
  * Server Action to handle waitlist form submissions
@@ -25,17 +31,7 @@ export async function joinWaitlist(
   prevState: WaitlistState,
   formData: FormData
 ): Promise<WaitlistState> {
-  try {
     const rawData = Object.fromEntries(formData.entries());
-
-    // 1. Explicit Validation
-    if (!rawData.name || !rawData.email || !rawData.researchInterests) {
-        return {
-            message: 'Please fill out all required fields.',
-            status: 'error',
-        };
-    }
-
     const parsed = WaitlistFormSchema.safeParse(rawData);
 
     if (!parsed.success) {
@@ -43,11 +39,13 @@ export async function joinWaitlist(
       return {
         message: 'Invalid form data. Please check your entries.',
         status: 'error',
+        errors: parsed.error.flatten().fieldErrors,
       };
     }
 
     const { name, email, researchInterests } = parsed.data;
 
+  try {
     // 2. Save to Firestore (backend file)
     const waitlistEntry = {
       name,
@@ -69,6 +67,7 @@ export async function joinWaitlist(
     return {
       message: "Thank you for joining the waitlist! We'll be in touch soon.",
       status: 'success',
+      errors: null,
     };
   } catch (error) {
     console.error('Error saving waitlist entry:', error);
@@ -76,6 +75,7 @@ export async function joinWaitlist(
     return {
       message: 'Something went wrong. Please try again later.',
       status: 'error',
+      errors: null,
     };
   }
 }
