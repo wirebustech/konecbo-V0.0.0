@@ -1,87 +1,78 @@
 'use server';
 
 import { z } from 'zod';
-import { db } from '@/lib/firebase-admin';
+import { db } from '@/lib/firebase';
 import { sendWaitlistNotification } from '@/lib/email';
 
-const waitlistSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  email: z.string().email({ message: 'Please enter a valid email.' }),
-  researchInterests: z
-    .string()
-    .min(10, { message: 'Please tell us a bit more.' })
-    .max(500, { message: 'Please keep your interests under 500 characters.' }),
+const WaitlistFormSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  researchInterests: z.string(),
 });
 
-export type WaitlistState = {
+export interface WaitlistState {
   message: string;
   status: 'success' | 'error' | 'idle';
-  errors?: {
-    name?: string[];
-    email?: string[];
-    researchInterests?: string[];
-  };
-};
+}
 
-export async function registerToWaitlist(
+/**
+ * Server Action to handle waitlist form submissions
+ * - Validates input
+ * - Saves to Firebase
+ * - Sends email notification
+ */
+export async function joinWaitlist(
   prevState: WaitlistState,
   formData: FormData
 ): Promise<WaitlistState> {
-  const validatedFields = waitlistSchema.safeParse({
-    name: formData.get('name'),
-    email: formData.get('email'),
-    researchInterests: formData.get('researchInterests'),
-  });
-
-  if (!validatedFields.success) {
-    const errors = validatedFields.error.flatten().fieldErrors;
-    return {
-      message: 'Please correct the errors below.',
-      status: 'error',
-      errors: errors,
-    };
-  }
-
-  const { name, email, researchInterests } = validatedFields.data;
-
   try {
-    // Check if email already exists in waitlist
-    const existingEntry = await db
-      .collection('waitlist')
-      .where('email', '==', email.toLowerCase())
-      .limit(1)
-      .get();
+    const rawData = Object.fromEntries(formData.entries());
 
-    if (!existingEntry.empty) {
+    // 1. Explicit Validation
+    if (!rawData.name || !rawData.email || !rawData.researchInterests) {
+        return {
+            message: 'Please fill out all required fields.',
+            status: 'error',
+        };
+    }
+
+    const parsed = WaitlistFormSchema.safeParse(rawData);
+
+    if (!parsed.success) {
+      console.log('Validation failed', parsed.error.flatten().fieldErrors);
       return {
-        message: 'This email is already registered on our waitlist!',
+        message: 'Invalid form data. Please check your entries.',
         status: 'error',
       };
     }
 
-    // Save to Firestore
+    const { name, email, researchInterests } = parsed.data;
+
+    // 2. Save to Firestore (backend file)
     const waitlistEntry = {
-      name: name.trim(),
-      email: email.toLowerCase().trim(),
-      researchInterests: researchInterests.trim(),
+      name,
+      email,
+      researchInterests,
       createdAt: new Date(),
-      status: 'pending',
     };
 
     await db.collection('waitlist').add(waitlistEntry);
+    console.log('Waitlist entry saved to Firebase');
 
-    // Send email notification (non-blocking)
+    // 3. Send email notification (non-blocking)
     sendWaitlistNotification(waitlistEntry).catch((error) => {
       console.error('Failed to send email notification:', error);
       // Don't fail the request if email fails
     });
 
+    // 4. Return success notification
     return {
       message: "Thank you for joining the waitlist! We'll be in touch soon.",
       status: 'success',
     };
   } catch (error) {
     console.error('Error saving waitlist entry:', error);
+    // 5. Return error notification
     return {
       message: 'Something went wrong. Please try again later.',
       status: 'error',

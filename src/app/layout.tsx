@@ -4,7 +4,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Konecbo - Connecting Researchers',
-  description: 'The upcoming platform for scientific collaboration. Join the waitlist!',
+  description: 'The secure platform for research collaboration. Join the waitlist!',
 };
 
 export default function RootLayout({
