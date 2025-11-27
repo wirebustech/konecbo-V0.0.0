@@ -8,6 +8,7 @@
  * 
  * Set the EMAIL_PROVIDER environment variable to choose the provider.
  */
+import nodemailer from 'nodemailer';
 
 interface WaitlistEntry {
   name: string;
@@ -87,11 +88,41 @@ async function sendViaResend(entry: WaitlistEntry): Promise<void> {
  * Requires: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD environment variables
  */
 async function sendViaSMTP(entry: WaitlistEntry): Promise<void> {
-  // This would require installing nodemailer: npm install nodemailer
-  // For now, we'll throw an error if SMTP is selected but not fully configured
-  throw new Error(
-    'SMTP email provider requires nodemailer. Install it with: npm install nodemailer'
-  );
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, ADMIN_EMAIL, FROM_EMAIL } = process.env;
+
+  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASSWORD) {
+    throw new Error('SMTP environment variables are not fully configured');
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: parseInt(SMTP_PORT, 10),
+    secure: parseInt(SMTP_PORT, 10) === 465, // true for 465, false for other ports
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASSWORD,
+    },
+  });
+
+  const adminEmail = ADMIN_EMAIL || FROM_EMAIL;
+  if (!adminEmail) {
+    throw new Error('ADMIN_EMAIL or FROM_EMAIL is not configured');
+  }
+
+  try {
+    await transporter.sendMail({
+      from: FROM_EMAIL || 'Konecbo <noreply@konecbo.com>',
+      to: adminEmail,
+      subject: 'New Waitlist Registration - Konecbo',
+      html: generateEmailHTML(entry),
+      text: generateEmailText(entry),
+    });
+
+    console.log('SMTP email sent successfully');
+  } catch (error) {
+    console.error('SMTP email error:', error);
+    throw error;
+  }
 }
 
 /**
@@ -167,6 +198,5 @@ function escapeHtml(text: string): string {
     '"': '&quot;',
     "'": '&#039;',
   };
-  return text.replace(/[&<>"']/g, (m) => map[m]);
+  return text.replace(/[&<>"\']/g, (m) => map[m]);
 }
-
