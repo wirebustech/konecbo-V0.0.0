@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-grow">
+      <main className="flex-grow dark:bg-gray-900">
         <Hero />
         <ProductInfo />
       </main>
