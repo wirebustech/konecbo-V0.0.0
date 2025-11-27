@@ -4,11 +4,13 @@
  * This module supports multiple email providers:
  * - Resend (recommended for production)
  * - SMTP via nodemailer
+ * - Azure Communication Service
  * - Custom email service
  * 
  * Set the EMAIL_PROVIDER environment variable to choose the provider.
  */
 import nodemailer from 'nodemailer';
+import { EmailClient } from "@azure/communication-email";
 
 interface WaitlistEntry {
   name: string;
@@ -30,6 +32,9 @@ export async function sendWaitlistNotification(entry: WaitlistEntry): Promise<vo
     case 'smtp':
       await sendViaSMTP(entry);
       break;
+    case 'azure':
+      await sendViaAzure(entry);
+      break;
     case 'none':
     default:
       // No email service configured - just log
@@ -41,6 +46,44 @@ export async function sendWaitlistNotification(entry: WaitlistEntry): Promise<vo
       break;
   }
 }
+
+/**
+ * Send email via Azure Communication Service
+ * Requires: AZURE_COMMUNICATION_CONNECTION_STRING, AZURE_SENDER_EMAIL environment variables
+ */
+async function sendViaAzure(entry: WaitlistEntry): Promise<void> {
+    const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING;
+    const senderEmail = process.env.AZURE_SENDER_EMAIL;
+    const adminEmail = process.env.ADMIN_EMAIL;
+
+    if (!connectionString || !senderEmail || !adminEmail) {
+        throw new Error('Azure Communication Service environment variables are not fully configured');
+    }
+
+    try {
+        const emailClient = new EmailClient(connectionString);
+
+        const message = {
+            senderAddress: senderEmail,
+            content: {
+                subject: "New Waitlist Registration - Konecbo",
+                html: generateEmailHTML(entry),
+                plainText: generateEmailText(entry),
+            },
+            recipients: {
+                to: [{ address: adminEmail }],
+            },
+        };
+
+        const poller = await emailClient.beginSend(message);
+        await poller.pollUntilDone();
+        console.log("Azure email sent successfully");
+    } catch (error) {
+        console.error("Azure email error:", error);
+        throw error;
+    }
+}
+
 
 /**
  * Send email via Resend (https://resend.com)
