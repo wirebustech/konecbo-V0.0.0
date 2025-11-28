@@ -47,8 +47,8 @@ git commit -m "Initial commit: Konecbo research collaboration platform
 - Next.js 15 application with waitlist functionality
 - Firebase integration for data storage
 - Email notifications via Resend
-- Deployment configurations for Azure and AWS
-- Kubernetes manifests included"
+- Deployment configurations for Azure
+- Azure App Service deployment configuration included"
 ```
 
 ### Step 5: Create GitHub Repository
@@ -181,7 +181,7 @@ If you have large files, consider:
    ```bash
    git commit -m "Add waitlist form with Firebase integration"
    git commit -m "Fix countdown timer date issue"
-   git commit -m "Add deployment configurations for Azure and AWS"
+   git commit -m "Add deployment configurations for Azure"
    ```
 
 3. **Create branches for features**:

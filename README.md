@@ -51,7 +51,7 @@ Konecbo is an innovative platform dedicated to fostering collaboration among res
 
 ## Documentation
 
-- **[Deployment Guide](./DEPLOYMENT.md)** - Deploy to Azure App Service, AKS, AWS, or EKS
+- **[Deployment Guide](./DEPLOYMENT.md)** - Deploy to Azure App Service
 - **[Waitlist Setup](./docs/WAITLIST_SETUP.md)** - Configure Firebase and email notifications
 
 ## Available Scripts
@@ -74,7 +74,6 @@ konecbo-v0.0.0/
 │   ├── lib/             # Utilities and configurations
 │   └── hooks/           # Custom React hooks
 ├── public/              # Static assets
-├── k8s/                 # Kubernetes manifests
 ├── .github/workflows/   # CI/CD pipelines
 └── docs/                # Documentation
 
@@ -85,9 +84,6 @@ konecbo-v0.0.0/
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions on deploying to:
 
 - ☁️ Azure App Service
-- ☸️ Azure Kubernetes Service (AKS)
-- 🚀 AWS Elastic Beanstalk / EC2
-- ☸️ AWS Elastic Kubernetes Service (EKS)
 
 ## Environment Variables
 

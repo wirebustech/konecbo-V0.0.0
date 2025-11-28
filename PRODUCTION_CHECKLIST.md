@@ -26,7 +26,7 @@ This checklist ensures your Konecbo application is ready for cloud deployment.
 ## ✅ Configuration
 
 ### Next.js Configuration
-- [x] Standalone output enabled for Docker
+- [x] Standalone output enabled for optimized builds
 - [x] TypeScript errors handled appropriately
 - [x] ESLint configured
 - [x] Image domains configured
@@ -51,23 +51,13 @@ This checklist ensures your Konecbo application is ready for cloud deployment.
 
 ## ✅ Deployment Files
 
-### Docker
-- [x] `Dockerfile` created and optimized
-- [x] `.dockerignore` configured
-- [x] Multi-stage build implemented
 
-### Kubernetes
-- [x] Deployment manifest (`k8s/deployment.yaml`)
-- [x] Service manifest (`k8s/service.yaml`)
-- [x] Ingress manifest (`k8s/ingress.yaml`)
 
 ### CI/CD
 - [x] GitHub Actions workflows created
 - [x] Azure deployment workflow
-- [x] AWS deployment workflow
 
 ### Cloud Platform Configs
-- [x] Elastic Beanstalk configs (`.ebextensions/`)
 - [x] Deployment documentation (`DEPLOYMENT.md`)
 
 ## ✅ Documentation
@@ -124,7 +114,7 @@ PORT=3000
 - ✅ Implement rate limiting (consider adding)
 - ✅ Monitor logs for suspicious activity
 - ✅ Keep dependencies updated
-- ✅ Use secrets management (Azure Key Vault, AWS Secrets Manager)
+- ✅ Use secrets management (Azure Key Vault)
 
 ### Don'ts ❌
 - ❌ Never commit `.env` files
