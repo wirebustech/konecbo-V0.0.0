@@ -1,25 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-const STARTING_COUNT = 2;
+import { getWaitlistCount } from '@/app/actions';
 
 export function RegistrationCount() {
-  const [count, setCount] = useState(STARTING_COUNT);
+  const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
-    const randomInterval = Math.random() * 10000 + 20000; // between 10-20 seconds
+    async function fetchCount() {
+      const fetchedCount = await getWaitlistCount();
+      setCount(fetchedCount);
+    }
 
-    const timer = setTimeout(() => {
-      setCount((prevCount: number) => prevCount + 1);
-    }, randomInterval);
+    fetchCount();
 
-    return () => clearTimeout(timer);
-  }, [count]);
+    // Optional: Refresh the count periodically
+    const interval = setInterval(fetchCount, 60000); // every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <span className="font-bold text-accent transition-all duration-300">
-      {count.toLocaleString()}
+      {count !== null ? count.toLocaleString() : 'Loading...'}
     </span>
   );
 }

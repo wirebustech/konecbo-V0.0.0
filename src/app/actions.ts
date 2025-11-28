@@ -79,3 +79,16 @@ export async function joinWaitlist(
     };
   }
 }
+
+/**
+ * Server Action to get the number of waitlist entries.
+ */
+export async function getWaitlistCount(): Promise<number> {
+  try {
+    const snapshot = await db.collection('waitlist').get();
+    return snapshot.size;
+  } catch (error) {
+    console.error('Error fetching waitlist count:', error);
+    return 0; // Return 0 on error
+  }
+}
