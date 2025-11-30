@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 // Set a target launch date in the future
-const LAUNCH_DATE = new Date('2026-02-01T00:00:00Z');
+const LAUNCH_DATE = new Date('2026-02-17T00:00:00Z');
 
 export function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState<{
