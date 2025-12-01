@@ -221,7 +221,7 @@ function generateEmailHTML(entry: WaitlistEntry): string {
  */
 function generateEmailText(entry: WaitlistEntry): string {
   return `
-New Waitlist Registration - Konecbo
+New Konecbo Waitlist Registration!
 
 Name: ${entry.name}
 Email: ${entry.email}
