@@ -73,15 +73,31 @@ export async function joinWaitlist(
     } catch (emailError) {
       console.error('Failed to send email notification:', emailError);
       
-      // If email fails and Firebase is not available, return error
-      if (!db) {
+      // Email is required - always return error if it fails
+      const errorMessage = emailError instanceof Error ? emailError.message : String(emailError);
+      
+      // Provide specific error messages based on the error
+      if (errorMessage.includes('not configured') || errorMessage.includes('environment variables')) {
         return {
-          message: 'Unable to process your request. Please check email configuration.',
+          message: 'Email service is not properly configured. Please contact support.',
           status: 'error',
           errors: null,
         };
       }
-      // If Firebase succeeded but email failed, still return success
+      
+      if (errorMessage.includes('Azure') || errorMessage.includes('Communication Service')) {
+        return {
+          message: 'Failed to send email notification. Please check Azure Communication Service configuration.',
+          status: 'error',
+          errors: null,
+        };
+      }
+      
+      return {
+        message: 'Failed to send email notification. Please try again later or contact support.',
+        status: 'error',
+        errors: null,
+      };
     }
 
     // 4. Return success notification
