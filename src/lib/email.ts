@@ -110,7 +110,7 @@ async function sendViaResend(entry: WaitlistEntry): Promise<void> {
       body: JSON.stringify({
         from: process.env.FROM_EMAIL || 'Konecbo <noreply@konecbo.com>',
         to: [adminEmail],
-        subject: 'New Waitlist Registration - Konecbo',
+        subject: 'New Konecbo Waitlist Registration',
         html: generateEmailHTML(entry),
         text: generateEmailText(entry),
       }),
