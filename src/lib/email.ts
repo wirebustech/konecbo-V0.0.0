@@ -9,8 +9,11 @@
  * 
  * Set the EMAIL_PROVIDER environment variable to choose the provider.
  */
-import nodemailer from 'nodemailer';
-import { EmailClient } from "@azure/communication-email";
+import type { EmailClient } from "@azure/communication-email";
+
+// Dynamic imports to avoid build-time resolution issues if packages are missing
+// import nodemailer from 'nodemailer';
+// import { EmailClient } from "@azure/communication-email";
 
 interface WaitlistEntry {
   name: string;
@@ -52,36 +55,37 @@ export async function sendWaitlistNotification(entry: WaitlistEntry): Promise<vo
  * Requires: AZURE_COMMUNICATION_CONNECTION_STRING, AZURE_SENDER_EMAIL environment variables
  */
 async function sendViaAzure(entry: WaitlistEntry): Promise<void> {
-    const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING;
-    const senderEmail = process.env.AZURE_SENDER_EMAIL;
-    const adminEmail = process.env.ADMIN_EMAIL;
+  const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING;
+  const senderEmail = process.env.AZURE_SENDER_EMAIL;
+  const adminEmail = process.env.ADMIN_EMAIL;
 
-    if (!connectionString || !senderEmail || !adminEmail) {
-        throw new Error('Azure Communication Service environment variables are not fully configured');
-    }
+  if (!connectionString || !senderEmail || !adminEmail) {
+    throw new Error('Azure Communication Service environment variables are not fully configured');
+  }
 
-    try {
-        const emailClient = new EmailClient(connectionString);
+  try {
+    const { EmailClient } = await import("@azure/communication-email");
+    const emailClient = new EmailClient(connectionString);
 
-        const message = {
-            senderAddress: senderEmail,
-            content: {
-                subject: "New Waitlist Registration - Konecbo",
-                html: generateEmailHTML(entry),
-                plainText: generateEmailText(entry),
-            },
-            recipients: {
-                to: [{ address: adminEmail }],
-            },
-        };
+    const message = {
+      senderAddress: senderEmail,
+      content: {
+        subject: "New Waitlist Registration - Konecbo",
+        html: generateEmailHTML(entry),
+        plainText: generateEmailText(entry),
+      },
+      recipients: {
+        to: [{ address: adminEmail }],
+      },
+    };
 
-        const poller = await emailClient.beginSend(message);
-        await poller.pollUntilDone();
-        console.log("Azure email sent successfully");
-    } catch (error) {
-        console.error("Azure email error:", error);
-        throw error;
-    }
+    const poller = await emailClient.beginSend(message);
+    await poller.pollUntilDone();
+    console.log("Azure email sent successfully");
+  } catch (error) {
+    console.error("Azure email error:", error);
+    throw error;
+  }
 }
 
 
@@ -137,6 +141,7 @@ async function sendViaSMTP(entry: WaitlistEntry): Promise<void> {
     throw new Error('SMTP environment variables are not fully configured');
   }
 
+  const nodemailer = (await import("nodemailer")).default;
   const transporter = nodemailer.createTransport({
     host: SMTP_HOST,
     port: parseInt(SMTP_PORT, 10),
