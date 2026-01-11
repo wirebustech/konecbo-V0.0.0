@@ -9,7 +9,8 @@ export function RegistrationCount() {
   useEffect(() => {
     async function fetchCount() {
       const fetchedCount = await getWaitlistCount();
-      setCount(fetchedCount);
+      // Add 500 to start the count from 500
+      setCount(fetchedCount + 500);
     }
 
     fetchCount();
