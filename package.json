@@ -12,7 +12,8 @@
     "build": "NODE_OPTIONS='--no-experimental-require-module' NODE_ENV=production next build",
     "start": "NODE_OPTIONS='--no-experimental-require-module' next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@azure/communication-email": "^1.1.0",

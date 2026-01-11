@@ -1,0 +1,14 @@
+diff --git a/node_modules/tailwindcss/lib/lib/setupTrackingContext.js b/node_modules/tailwindcss/lib/lib/setupTrackingContext.js
+index d3f7138..3cce590 100644
+--- a/node_modules/tailwindcss/lib/lib/setupTrackingContext.js
++++ b/node_modules/tailwindcss/lib/lib/setupTrackingContext.js
+@@ -29,7 +29,8 @@ function _interop_require_default(obj) {
+         default: obj
+     };
+ }
+-let configPathCache = new _quicklru.default({
++let configPathCache = const QuickLRU = _quicklru.default || _quicklru;
++let configPathCache = new QuickLRU({
+     maxSize: 100
+ });
+ let candidateFilesCache = new WeakMap();
