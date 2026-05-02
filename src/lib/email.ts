@@ -4,12 +4,12 @@
  * This module supports multiple email providers:
  * - Resend (recommended for production)
  * - SMTP via nodemailer
- * - Azure Communication Service
+ * - AWS SES
  * - Custom email service
  * 
  * Set the EMAIL_PROVIDER environment variable to choose the provider.
  */
-import type { EmailClient } from "@azure/communication-email";
+import type { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 // Dynamic imports to avoid build-time resolution issues if packages are missing
 // import nodemailer from 'nodemailer';
@@ -35,8 +35,8 @@ export async function sendWaitlistNotification(entry: WaitlistEntry): Promise<vo
     case 'smtp':
       await sendViaSMTP(entry);
       break;
-    case 'azure':
-      await sendViaAzure(entry);
+    case 'aws-ses':
+      await sendViaAWSSES(entry);
       break;
     case 'none':
     default:
@@ -51,39 +51,46 @@ export async function sendWaitlistNotification(entry: WaitlistEntry): Promise<vo
 }
 
 /**
- * Send email via Azure Communication Service
- * Requires: AZURE_COMMUNICATION_CONNECTION_STRING, AZURE_SENDER_EMAIL environment variables
+ * Send email via AWS SES
+ * Requires: AWS_SES_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SES_SENDER_EMAIL environment variables
  */
-async function sendViaAzure(entry: WaitlistEntry): Promise<void> {
-  const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING;
-  const senderEmail = process.env.AZURE_SENDER_EMAIL;
+async function sendViaAWSSES(entry: WaitlistEntry): Promise<void> {
+  const region = process.env.AWS_SES_REGION || process.env.AWS_REGION;
+  const senderEmail = process.env.AWS_SES_SENDER_EMAIL || process.env.FROM_EMAIL;
   const adminEmail = process.env.ADMIN_EMAIL;
 
-  if (!connectionString || !senderEmail || !adminEmail) {
-    throw new Error('Azure Communication Service environment variables are not fully configured');
+  if (!region || !senderEmail || !adminEmail) {
+    throw new Error('AWS SES environment variables are not fully configured');
   }
 
   try {
-    const { EmailClient } = await import("@azure/communication-email");
-    const emailClient = new EmailClient(connectionString);
+    const { SESClient, SendEmailCommand } = await import("@aws-sdk/client-ses");
+    const sesClient = new SESClient({ region });
 
-    const message = {
-      senderAddress: senderEmail,
-      content: {
-        subject: "New Waitlist Registration - Konecbo",
-        html: generateEmailHTML(entry),
-        plainText: generateEmailText(entry),
+    const command = new SendEmailCommand({
+      Source: senderEmail,
+      Destination: {
+        ToAddresses: [adminEmail],
       },
-      recipients: {
-        to: [{ address: adminEmail }],
+      Message: {
+        Subject: {
+          Data: "New Waitlist Registration - Konecbo",
+        },
+        Body: {
+          Html: {
+            Data: generateEmailHTML(entry),
+          },
+          Text: {
+            Data: generateEmailText(entry),
+          },
+        },
       },
-    };
+    });
 
-    const poller = await emailClient.beginSend(message);
-    await poller.pollUntilDone();
-    console.log("Azure email sent successfully");
+    await sesClient.send(command);
+    console.log("AWS SES email sent successfully");
   } catch (error) {
-    console.error("Azure email error:", error);
+    console.error("AWS SES email error:", error);
     throw error;
   }
 }

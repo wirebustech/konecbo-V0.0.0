@@ -85,9 +85,9 @@ export async function joinWaitlist(
         };
       }
       
-      if (errorMessage.includes('Azure') || errorMessage.includes('Communication Service')) {
+      if (errorMessage.includes('AWS') || errorMessage.includes('SES')) {
         return {
-          message: 'Failed to send email notification. Please check Azure Communication Service configuration.',
+          message: 'Failed to send email notification. Please check AWS SES configuration.',
           status: 'error',
           errors: null,
         };
