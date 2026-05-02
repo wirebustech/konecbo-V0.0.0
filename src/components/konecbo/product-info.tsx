@@ -12,7 +12,7 @@ const features = [
     icon: <Users className="h-10 w-10 text-accent" />,
     title: 'Connect with Peers',
     description:
-      'Find and connect with early career researchers and professionals who share your interests from around the globe.',
+      'Find and connect with early career researchers and professionals who share your interests.',
   },
   {
     icon: <Lightbulb className="h-10 w-10 text-accent" />,
@@ -26,7 +26,7 @@ const features = [
     description:
       'Share your ongoing research, pre-prints, and published papers to get feedback and citations.',
   },
-  
+
 ];
 
 export default function ProductInfo() {
