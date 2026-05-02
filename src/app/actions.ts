@@ -101,8 +101,9 @@ export async function joinWaitlist(
     }
 
     // 4. Return success notification
+    const activeProvider = process.env.EMAIL_PROVIDER || 'none';
     return {
-      message: "Thank you for joining the waitlist! We'll be in touch soon.",
+      message: `Thank you for joining the waitlist! (Debug Provider: ${activeProvider})`,
       status: 'success',
       errors: null,
     };
