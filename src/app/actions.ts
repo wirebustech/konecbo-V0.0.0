@@ -85,9 +85,9 @@ export async function joinWaitlist(
         };
       }
       
-      if (errorMessage.includes('AWS') || errorMessage.includes('SES')) {
+      if (errorMessage.includes('AWS') || errorMessage.includes('SES') || errorMessage.includes('MessageRejected')) {
         return {
-          message: 'Failed to send email notification. Please check AWS SES configuration.',
+          message: `Email Error: ${errorMessage}`, // Temporary: Return exact error for debugging
           status: 'error',
           errors: null,
         };
