@@ -52,11 +52,11 @@ export async function sendWaitlistNotification(entry: WaitlistEntry): Promise<vo
 
 /**
  * Send email via AWS SES
- * Requires: AWS_SES_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SES_SENDER_EMAIL environment variables
+ * Requires: SES_REGION, SES_SENDER_EMAIL, and optionally SES_ACCESS_KEY_ID / SES_SECRET_ACCESS_KEY
  */
 async function sendViaAWSSES(entry: WaitlistEntry): Promise<void> {
-  const region = process.env.AWS_SES_REGION || process.env.AWS_REGION;
-  const senderEmail = process.env.AWS_SES_SENDER_EMAIL || process.env.FROM_EMAIL;
+  const region = process.env.SES_REGION || process.env.AWS_REGION;
+  const senderEmail = process.env.SES_SENDER_EMAIL || process.env.FROM_EMAIL;
   const adminEmail = process.env.ADMIN_EMAIL;
 
   if (!region || !senderEmail || !adminEmail) {
@@ -65,7 +65,19 @@ async function sendViaAWSSES(entry: WaitlistEntry): Promise<void> {
 
   try {
     const { SESClient, SendEmailCommand } = await import("@aws-sdk/client-ses");
-    const sesClient = new SESClient({ region });
+    
+    // Explicitly pass credentials if they exist in the env variables
+    const credentials = process.env.SES_ACCESS_KEY_ID && process.env.SES_SECRET_ACCESS_KEY
+      ? {
+          accessKeyId: process.env.SES_ACCESS_KEY_ID,
+          secretAccessKey: process.env.SES_SECRET_ACCESS_KEY,
+        }
+      : undefined;
+
+    const sesClient = new SESClient({ 
+      region,
+      ...(credentials ? { credentials } : {})
+    });
 
     const command = new SendEmailCommand({
       Source: senderEmail,
