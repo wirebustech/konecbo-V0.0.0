@@ -1,0 +1,23 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+    build:
+      commands:
+        - echo "EMAIL_PROVIDER=$EMAIL_PROVIDER" >> .env.production
+        - echo "ADMIN_EMAIL=$ADMIN_EMAIL" >> .env.production
+        - echo "SES_REGION=$SES_REGION" >> .env.production
+        - echo "SES_SENDER_EMAIL=$SES_SENDER_EMAIL" >> .env.production
+        - echo "SES_ACCESS_KEY_ID=$SES_ACCESS_KEY_ID" >> .env.production
+        - echo "SES_SECRET_ACCESS_KEY=$SES_SECRET_ACCESS_KEY" >> .env.production
+        - npm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*
