@@ -32,6 +32,17 @@ export async function joinWaitlist(
   formData: FormData
 ): Promise<WaitlistState> {
   const rawData = Object.fromEntries(formData.entries());
+  
+  // Honeypot check to prevent bots
+  if (rawData.bot_field) {
+    console.log('Bot detected via honeypot field. Silently ignoring.');
+    return {
+      message: 'Thank you for joining the waitlist! We will be in touch soon.',
+      status: 'success',
+      errors: null,
+    };
+  }
+
   const parsed = WaitlistFormSchema.safeParse(rawData);
 
   if (!parsed.success) {

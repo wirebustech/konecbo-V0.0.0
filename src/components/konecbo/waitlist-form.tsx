@@ -89,6 +89,13 @@ export function WaitlistForm() {
             />
              {state.errors?.researchInterests && <p className="text-sm font-medium text-destructive">{state.errors.researchInterests[0]}</p>}
           </div>
+          
+          {/* Honeypot field - invisible to humans, filled by dumb bots */}
+          <div aria-hidden="true" className="absolute opacity-0 -z-10 pointer-events-none">
+            <label htmlFor="bot-field" tabIndex={-1}>Do not fill this out if you are human:</label>
+            <Input id="bot-field" name="bot_field" tabIndex={-1} autoComplete="off" />
+          </div>
+
           <SubmitButton />
         </form>
       </CardContent>
