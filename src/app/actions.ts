@@ -31,19 +31,19 @@ export async function joinWaitlist(
   prevState: WaitlistState,
   formData: FormData
 ): Promise<WaitlistState> {
-    const rawData = Object.fromEntries(formData.entries());
-    const parsed = WaitlistFormSchema.safeParse(rawData);
+  const rawData = Object.fromEntries(formData.entries());
+  const parsed = WaitlistFormSchema.safeParse(rawData);
 
-    if (!parsed.success) {
-      console.log('Validation failed', parsed.error.flatten().fieldErrors);
-      return {
-        message: 'Invalid form data. Please check your entries.',
-        status: 'error',
-        errors: parsed.error.flatten().fieldErrors,
-      };
-    }
+  if (!parsed.success) {
+    console.log('Validation failed', parsed.error.flatten().fieldErrors);
+    return {
+      message: 'Invalid form data. Please check your entries.',
+      status: 'error',
+      errors: parsed.error.flatten().fieldErrors,
+    };
+  }
 
-    const { name, email, researchInterests } = parsed.data;
+  const { name, email, researchInterests } = parsed.data;
 
   try {
     const waitlistEntry = {
@@ -72,10 +72,10 @@ export async function joinWaitlist(
       console.log('Email notification sent successfully');
     } catch (emailError) {
       console.error('Failed to send email notification:', emailError);
-      
+
       // Email is required - always return error if it fails
       const errorMessage = emailError instanceof Error ? emailError.message : String(emailError);
-      
+
       // Provide specific error messages based on the error
       if (errorMessage.includes('not configured') || errorMessage.includes('environment variables')) {
         return {
@@ -84,7 +84,7 @@ export async function joinWaitlist(
           errors: null,
         };
       }
-      
+
       if (errorMessage.includes('AWS') || errorMessage.includes('SES') || errorMessage.includes('MessageRejected')) {
         return {
           message: `Email Error: ${errorMessage}`, // Temporary: Return exact error for debugging
@@ -92,7 +92,7 @@ export async function joinWaitlist(
           errors: null,
         };
       }
-      
+
       return {
         message: 'Failed to send email notification. Please try again later or contact support.',
         status: 'error',
@@ -102,25 +102,25 @@ export async function joinWaitlist(
 
     // 4. Return success notification
     return {
-      message: 'Thank you for joining the waitlist!',
+      message: 'Thank you for joining the waitlist! We will be in touch soon.',
       status: 'success',
       errors: null,
     };
   } catch (error) {
     console.error('Error saving waitlist entry:', error);
-    
+
     // Provide more specific error messages
     const errorMessage = error instanceof Error ? error.message : String(error);
-    
-    if (errorMessage.includes('Firebase Admin initialization failed') || 
-        errorMessage.includes('Missing FIREBASE_SERVICE_ACCOUNT_KEY')) {
+
+    if (errorMessage.includes('Firebase Admin initialization failed') ||
+      errorMessage.includes('Missing FIREBASE_SERVICE_ACCOUNT_KEY')) {
       return {
         message: 'Firebase configuration error. Please check your environment variables.',
         status: 'error',
         errors: null,
       };
     }
-    
+
     if (errorMessage.includes('PERMISSION_DENIED') || errorMessage.includes('permission')) {
       return {
         message: 'Database permission error. Please check Firestore security rules.',
@@ -128,7 +128,7 @@ export async function joinWaitlist(
         errors: null,
       };
     }
-    
+
     if (errorMessage.includes('not found') || errorMessage.includes('does not exist')) {
       return {
         message: 'Firestore database not found. Please create it in Firebase Console.',
@@ -136,7 +136,7 @@ export async function joinWaitlist(
         errors: null,
       };
     }
-    
+
     // 5. Return error notification
     return {
       message: 'Something went wrong. Please try again later.',
@@ -153,7 +153,7 @@ export async function getWaitlistCount(): Promise<number> {
   if (!db) {
     return 0; // Return 0 if Firebase is not configured
   }
-  
+
   try {
     const snapshot = await db.collection('waitlist').get();
     return snapshot.size;
