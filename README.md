@@ -108,7 +108,9 @@ Required environment variables (see `.env.example`):
 
 ## License
 
-[Add your license here]
+Copyright (c) 2026 Wirebus Tech. All rights reserved.
+
+This project is proprietary and confidential. Unauthorized copying, distribution, or modification of this software is strictly prohibited. See the [LICENSE](LICENSE) file for details.
 
 ## Support
 
